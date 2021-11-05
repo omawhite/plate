@@ -1,6 +1,6 @@
 import { TAncestor, TNode } from '@udecode/plate-core';
 import { Location, Path, Point, Range } from 'slate';
-import { Predicate } from '../queries/match';
+import { Predicate } from '../queries';
 
 export type NodeMatch<T = TNode> = Predicate<T>;
 
@@ -21,6 +21,7 @@ export interface EditorAboveOptions<T = TAncestor> extends MatchOptions<T> {
   at?: Range | Path | Point;
   mode?: 'highest' | 'lowest';
   voids?: boolean;
+  throwError?: boolean;
 }
 
 export interface EditorParentOptions {

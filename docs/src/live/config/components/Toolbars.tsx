@@ -180,7 +180,7 @@ export const ListExtensionToolbarButtons = () => {
     type: string;
     clear?: string;
   } & ToolbarButtonProps): JSX.Element => {
-    const [licSelection] = useListItemContentSelection(editor?.id);
+    const [licSelection] = useListItemContentSelection(editor?.id as string);
 
     const active =
       editor &&
@@ -229,12 +229,12 @@ export const ListExtensionToolbarButtons = () => {
     const [open, setOpen] = useState(false);
     const editorRef = usePlateEditorRef();
     const type = getPlatePluginType(editorRef, pluginKey);
-    const [licSelection] = useListItemContentSelection(editor?.id);
+    const [licSelection] = useListItemContentSelection(editor?.id as string);
 
     const color =
       editorRef &&
       (licSelection
-        ? isListItemContentMarkActive(editor, licSelection, type)
+        ? isListItemContentMarkActive(editorRef, licSelection, type)
         : getMark(editorRef, type));
 
     const [selectedColor, setSelectedColor] = useState<string>();

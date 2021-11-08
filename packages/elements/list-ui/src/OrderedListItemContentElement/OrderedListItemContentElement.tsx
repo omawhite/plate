@@ -1,6 +1,6 @@
 import * as React from 'react';
 import { CSSProperties, ReactElement } from 'react';
-import { getPlatePluginOptions, useEditorState } from '@udecode/plate-core';
+import { getPlatePluginOptions } from '@udecode/plate-core';
 import {
   isListItemContentSelected,
   KEY_LIST,
@@ -89,8 +89,6 @@ export const OrderedListItemContentElement = (
         {} as CSSProperties
       )
     : ({} as Partial<CSSProperties>);
-
-  console.log(editor.id, additionalStyles);
 
   return (
     <div

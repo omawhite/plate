@@ -1,4 +1,4 @@
-import { CSSProperties, ReactChild, ReactChildren, ReactNode } from 'react';
+import { CSSProperties } from 'react';
 
 export type SupportedMarksParams = {
   key: '';

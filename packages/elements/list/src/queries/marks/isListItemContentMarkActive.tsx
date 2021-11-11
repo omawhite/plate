@@ -1,11 +1,11 @@
 import { TEditor } from '@udecode/plate-core';
-import { ListItemContentSelection } from '../../types';
-import { hasListItemContentMarkActive } from './hasListItemContentMarkActive';
+import { ListItemMarkerSelection } from '../../types';
+import { getListItemContentMark } from './getListItemContentMark';
 
 export const isListItemContentMarkActive = (
   editor: TEditor,
-  licSelection: ListItemContentSelection,
+  licSelection: ListItemMarkerSelection,
   key: string
 ): boolean => {
-  return !!hasListItemContentMarkActive(editor, licSelection, key);
+  return !!getListItemContentMark(editor, licSelection, key);
 };

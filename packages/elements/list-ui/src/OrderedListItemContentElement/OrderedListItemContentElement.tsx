@@ -1,10 +1,11 @@
 import * as React from 'react';
 import { CSSProperties, ReactElement } from 'react';
-import { getPlatePluginOptions } from '@udecode/plate-core';
+import { getPlatePluginOptions, PlateEditor } from '@udecode/plate-core';
 import {
-  isListItemContentSelected,
+  isListItemMarkerSelected,
   KEY_LIST,
-  SupportedMarksParams,
+  ListMarkOptions,
+  TransformNodeValueOptions,
   WithListOptions,
 } from '@udecode/plate-list';
 import {
@@ -14,8 +15,8 @@ import {
 import { cloneDeep } from 'lodash';
 import castArray from 'lodash/castArray';
 import { CSSObject } from 'styled-components';
-import { useListItemContentSelection } from '../hooks';
-import { onMouseDown } from './OnMouseDown';
+import { useListItemMarkerSelection } from '../hooks';
+import { handleListItemMarkerOnMouseDown } from './handleListItemMarkerOnMouseDown';
 
 /**
  * StyledElement with no default styles.
@@ -32,20 +33,20 @@ export const OrderedListItemContentElement = (
     element,
     editor,
   } = props;
-  const [licSelection, setLicSelection] = useListItemContentSelection(
+  const [markerSelection, { setMarkerSelection }] = useListItemMarkerSelection(
     editor?.id
   );
 
   const selected =
-    editor && isListItemContentSelected(editor, attributes.ref, licSelection);
+    editor && isListItemMarkerSelected(editor, attributes.ref, markerSelection);
 
   const options: WithListOptions = editor
     ? getPlatePluginOptions<Required<WithListOptions>>(editor, KEY_LIST)
     : {};
-  const { supportedMarks, numberRender } = options;
+  const { marks, onRenderMarker } = options;
 
-  const NumberElement =
-    numberRender ?? (() => <>{element?.order?.join('.')}.</>);
+  const MarkerElement =
+    onRenderMarker ?? (() => <>{element?.order?.join('.')}.</>);
 
   const rootStyles = castArray(styles?.root ?? []);
   const nodePropsStyles = nodeProps?.styles?.root?.css ?? [];
@@ -62,32 +63,28 @@ export const OrderedListItemContentElement = (
     return acc;
   }, {} as CSSObject);
 
-  const additionalStyles: Partial<CSSProperties> = supportedMarks
-    ? supportedMarks.reduce(
-        (acc: Partial<CSSProperties>, params: SupportedMarksParams) => {
-          const key = (params.cssPropName as string) || (params.key as string);
-          const transform: (params: {
-            options: WithListOptions;
-            value: unknown;
-            currentValue: unknown;
-          }) => string | number =
-            params.transformCssValue &&
-            typeof params.transformCssValue === 'function'
-              ? params.transformCssValue
-              : ({ value }: { value: unknown }): string | number => {
-                  return value as string | number;
-                };
-          return {
-            ...acc,
-            [key]: transform({
-              options,
-              value: element[params.key],
-              currentValue: acc[key],
-            }),
-          };
-        },
-        {} as CSSProperties
-      )
+  const additionalStyles: Partial<CSSProperties> = marks
+    ? marks.reduce((acc: Partial<CSSProperties>, params: ListMarkOptions) => {
+        const key = (params.styleKey as string) || (params.nodeKey as string);
+        const transform: (
+          editor: PlateEditor<{}>,
+          params: TransformNodeValueOptions<string | number>
+        ) => string | number =
+          params.transformNodeValue &&
+          typeof params.transformNodeValue === 'function'
+            ? params.transformNodeValue
+            : (e, { value }: { value: unknown }): string | number => {
+                return value as string | number;
+              };
+        return {
+          ...acc,
+          [key]: transform(editor, {
+            listOptions: options,
+            value: element[params.nodeKey],
+            currentValue: acc[key],
+          }),
+        };
+      }, {} as CSSProperties)
     : ({} as Partial<CSSProperties>);
 
   return (
@@ -110,10 +107,16 @@ export const OrderedListItemContentElement = (
           }}
           contentEditable={false}
           onMouseDown={(ev) =>
-            editor && onMouseDown(ev, editor, attributes, setLicSelection)
+            editor &&
+            handleListItemMarkerOnMouseDown(
+              ev,
+              editor,
+              attributes,
+              setMarkerSelection
+            )
           }
         >
-          <NumberElement order={cloneDeep(element.order)} options={options} />
+          <MarkerElement order={cloneDeep(element.order)} options={options} />
         </span>
       )}
       <span style={{ display: 'inline-block' }} {...attributes} {...nodeProps}>

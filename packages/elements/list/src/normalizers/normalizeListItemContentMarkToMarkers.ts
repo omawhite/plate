@@ -11,12 +11,12 @@ import { NodeEntry } from 'slate';
 import { ELEMENT_LIC, KEY_LIST } from '../defaults';
 import { PreviousStates, WithListOptions } from '../types';
 
-export const normalizeTextStyles = (
+export const normalizeListItemContentMarkToMarkers = (
   editor: PlateEditor,
   [node, path]: NodeEntry<TNode>
 ): void => {
   const licType = getPlatePluginType(editor, ELEMENT_LIC);
-  const { supportedMarks } = getPlatePluginOptions<Required<WithListOptions>>(
+  const { marks } = getPlatePluginOptions<Required<WithListOptions>>(
     editor,
     KEY_LIST
   );
@@ -38,9 +38,7 @@ export const normalizeTextStyles = (
         return;
       }
 
-      const types: string[] = supportedMarks
-        ? supportedMarks.map((value) => value.key)
-        : [];
+      const types: string[] = marks ? marks.map((value) => value.nodeKey) : [];
 
       const entries: [string, unknown][] = types
         .map((key: string): [string, boolean, unknown] => {

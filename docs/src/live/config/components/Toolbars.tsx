@@ -77,21 +77,20 @@ import {
   MARK_UNDERLINE,
   MarkToolbarButton,
   outdent,
-  removeListItemContentMark,
+  removeListItemContentMarkByMarkerSelection,
   removeMark,
-  setListItemContentMark,
+  setListItemContentMarkByMarkerSelection,
   setMarks,
   TableToolbarButton,
   toggleMark,
   ToolbarButton,
   ToolbarButtonProps,
   ToolbarDropdown,
-  useListItemContentSelection,
+  useListItemMarkerSelection,
   usePlateEditorRef,
   usePlateEditorState,
   usePlateEventId,
 } from '@udecode/plate';
-import { Transforms } from 'slate';
 import { ReactEditor } from 'slate-react';
 
 export const BasicElementToolbarButtons = () => {
@@ -180,7 +179,7 @@ export const ListExtensionToolbarButtons = () => {
     type: string;
     clear?: string;
   } & ToolbarButtonProps): JSX.Element => {
-    const [licSelection] = useListItemContentSelection(editor?.id as string);
+    const [licSelection] = useListItemMarkerSelection(editor?.id as string);
 
     const active =
       editor &&
@@ -198,7 +197,12 @@ export const ListExtensionToolbarButtons = () => {
           }
 
           if (licSelection) {
-            setListItemContentMark(editor, licSelection, type, !active);
+            setListItemContentMarkByMarkerSelection(
+              editor,
+              licSelection,
+              type,
+              !active
+            );
           } else {
             !!editor?.selection && toggleMark(editor, type, clear);
           }
@@ -229,7 +233,7 @@ export const ListExtensionToolbarButtons = () => {
     const [open, setOpen] = useState(false);
     const editorRef = usePlateEditorRef();
     const type = getPlatePluginType(editorRef, pluginKey);
-    const [licSelection] = useListItemContentSelection(editor?.id as string);
+    const [licSelection] = useListItemMarkerSelection(editor?.id as string);
 
     const color =
       editorRef &&
@@ -249,7 +253,12 @@ export const ListExtensionToolbarButtons = () => {
           setSelectedColor(value);
 
           if (licSelection) {
-            setListItemContentMark(editor, licSelection, type, value);
+            setListItemContentMarkByMarkerSelection(
+              editor,
+              licSelection,
+              type,
+              value
+            );
           } else {
             ReactEditor.focus(editorRef);
 
@@ -272,7 +281,11 @@ export const ListExtensionToolbarButtons = () => {
       if (editorRef && editor && (editor.selection || licSelection)) {
         if (selectedColor) {
           if (licSelection) {
-            removeListItemContentMark(editor, licSelection, type);
+            removeListItemContentMarkByMarkerSelection(
+              editor,
+              type,
+              licSelection
+            );
           } else {
             ReactEditor.focus(editorRef);
             removeMark(editor, { key: type });

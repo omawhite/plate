@@ -1,31 +1,39 @@
 import { CSSProperties } from 'react';
+import { PlateEditor, RenderFunction } from '@udecode/plate-core';
 
-export type SupportedMarksParams = {
-  key: '';
+export type TransformNodeValueOptions<TValue> = {
+  listOptions: WithListOptions<TValue>;
+  value: unknown;
+  currentValue: unknown;
+};
+
+export type ListMarkOptions<TValue = any> = {
+  /**
+   * Node key to map to the styles.
+   */
+  nodeKey: string;
 
   /**
-   * camelCase name of the css property that is used by the mark
-   * if not provided it will fall back to the plugin key
-   * @default key
+   * Style key to override.
+   * @default nodeKey
    */
-  cssPropName?: keyof CSSProperties;
+  styleKey?: keyof CSSProperties;
 
   /**
    * Transformation function that will be used to transform the value from the text
    * if not provided the value will be used as is
    * `value` the value on the element
-   * `currentValue` this will hold the current value of the cssPropName
-   * for scenarios when multiple plugin were to handle the same cssPropName
+   * `currentValue` this will hold the current value of the styleKey
+   * for scenarios when multiple plugin were to handle the same styleKey
    * @default undefined
    */
-  transformCssValue?: (params: {
-    options: WithListOptions;
-    value: unknown;
-    currentValue: unknown;
-  }) => number | string;
+  transformNodeValue?: (
+    editor: PlateEditor,
+    options: TransformNodeValueOptions<TValue>
+  ) => TValue;
 };
 
-export interface WithListOptions {
+export interface WithListOptions<TValue = any> {
   /**
    * Valid children types for list items, in addition to p and ul types.
    */
@@ -33,7 +41,7 @@ export interface WithListOptions {
 
   /**
    * Enables custom ordering, this is required for formatted numbering
-   * It will be enable if supportedMarks are provided
+   * It will be enable if marks are provided
    */
   enableOrdering?: boolean;
 
@@ -41,16 +49,16 @@ export interface WithListOptions {
    * Render for the number element,
    * @default ({order}) => order.join('.')
    */
-  numberRender?: (params: {
+  onRenderMarker?: RenderFunction<{
     order: number[];
-    options: WithListOptions;
-  }) => JSX.Element;
+    options: WithListOptions<TValue>;
+  }>;
 
   /**
    * List of supported marks
    */
-  supportedMarks?: SupportedMarksParams[];
+  marks?: ListMarkOptions<TValue>[];
 }
 
-export interface ListNormalizerOptions
-  extends Pick<WithListOptions, 'validLiChildrenTypes'> {}
+export interface ListNormalizerOptions<TValue = any>
+  extends Pick<WithListOptions<TValue>, 'validLiChildrenTypes'> {}

@@ -63,25 +63,10 @@ npm install @udecode/plate-list-ui
 With ordering enabled the list wil calculate its own order and enables you to format the numbers how you want them
 > If you mix `ol` with `ul` the ordering will restart whenever the list type changes
 
+> Note the normalizeInitialValue={true} between the Plate params, it needs this, so it would generate the order for the list items
+
 ```ts live
 () => {
-  const ToolbarButtonsList = () => {
-    const editor = usePlateEditorRef(usePlateEventId('focus'));
-
-    return (
-      <>
-        <ListToolbarButton
-          type={getPlatePluginType(editor, ELEMENT_UL)}
-          icon={<FormatListBulleted />}
-        />
-        <ListToolbarButton
-          type={getPlatePluginType(editor, ELEMENT_OL)}
-          icon={<FormatListNumbered />}
-        />
-      </>
-    );
-  };
-
   const plugins = [
     ...PLUGINS.basicNodes,
     createResetNodePlugin(CONFIG.resetBlockType),
@@ -89,7 +74,7 @@ With ordering enabled the list wil calculate its own order and enables you to fo
     createExitBreakPlugin(CONFIG.exitBreak),
     createListPlugin({
       enableOrdering: true,
-      numberRender: ({order})=>{
+      onRenderMarker: ({order})=>{
         const last = order.pop();
         return (
          <>
@@ -117,7 +102,7 @@ With ordering enabled the list wil calculate its own order and enables you to fo
   return (
     <>
       <HeadingToolbar>
-        <ToolbarButtonsList />
+        <ListToolbarButtons />
       </HeadingToolbar>
       <Plate
         id="list2"
@@ -127,9 +112,7 @@ With ordering enabled the list wil calculate its own order and enables you to fo
         editableProps={CONFIG.editableProps}
         initialValue={VALUES.listExtension}
         normalizeInitialValue={true}
-      >
-        <PlateListExtensionEffect />
-      </Plate>
+      />
     </>
   );
 }
@@ -137,16 +120,16 @@ With ordering enabled the list wil calculate its own order and enables you to fo
 
 ### Formatted ordered list
 
-When using `Marks`, you might want to enable `supportedMarks` in the list options this will allow you to format the numbering of the lists as well
+When using `Marks`, you might want to enable `marks` in the list options this will allow you to format the numbering of the lists as well
 
 This will do a couple of things:
 * The numbering wil be selectable
-  * Single click will select the same level items while clicking again will select the  clicked element
-* You can format the numbers with the `supportedMarks`
+  * Single click will select the same depth items while clicking again will select the  clicked element
+* You can format the numbers with the `marks`
   > Currently, Toolbar elements provided by Plate does not support list item content selection, but you can achieve this easily.
   >
   > For more details check out the plugin options and the [`ListExtensionToolbarButtons`](https://github.com/udecode/plate/blob/main/docs/src/live/config/components/Toolbars.tsx) component, so you know how to change your toolbar element for this.
-* If the whole text in a list item content is marked with one of the `supportedMarks` the numbering will inherit it
+* If the whole text in a list item content is marked with one of the `marks` the numbering will inherit it
   * You can always override this mark by selecting the numbering and changing it
 
 ```ts live
@@ -160,20 +143,20 @@ This will do a couple of things:
     createItalicPlugin(),
     createFontColorPlugin(),
     createListPlugin({
-      supportedMarks: [
+      marks: [
         {
-          key: MARK_BOLD,
-          cssPropName: 'fontWeight',
-          transformCssValue: ({value}) => value ? 'bold' : 'inherit'
+          nodeKey: MARK_BOLD,
+          styleKey: 'fontWeight',
+          transformNodeValue: (e, {value}) => value ? 'bold' : 'inherit'
         },
         {
-          key: MARK_ITALIC,
-          cssPropName: 'fontStyle',
-          transformCssValue: ({value}) => value ? 'italic' : 'inherit'
+          nodeKey: MARK_ITALIC,
+          styleKey: 'fontStyle',
+          transformNodeValue: (e, {value}) => value ? 'italic' : 'inherit'
         },
         {
-          key: MARK_COLOR,
-          cssPropName: 'color',
+          nodeKey: MARK_COLOR,
+          styleKey: 'color',
         }
       ]
     }),
@@ -206,7 +189,7 @@ This will do a couple of things:
         initialValue={VALUES.listExtension}
         normalizeInitialValue={true}
       >
-        <PlateListExtensionEffect />
+        <PlateMarkedListEffect />
       </Plate>
     </>
   );

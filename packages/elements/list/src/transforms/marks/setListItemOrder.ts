@@ -9,7 +9,7 @@ import { NodeEntry } from 'slate';
 import { ELEMENT_LI, ELEMENT_LIC } from '../../defaults';
 import { getListTypes } from '../../queries';
 
-export const setNodeOrder = (
+export const setListItemOrder = (
   type: string,
   editor: PlateEditor,
   node: NodeEntry<TAncestor>,
@@ -31,7 +31,7 @@ export const setNodeOrder = (
         _orders = [];
       }
 
-      setNodeOrder(child.type, editor, c, _orders);
+      setListItemOrder(child.type, editor, c, _orders);
 
       if (!isEqual(child.order, _orders)) {
         setNodes(editor, { order: _orders }, { at: childPath });
@@ -39,7 +39,7 @@ export const setNodeOrder = (
     }
     // it is a child of an <ol> and it has to increase the index and it has to extend the orders
     if (child.type === liType) {
-      setNodeOrder(type, editor, c, [...orders, index]);
+      setListItemOrder(type, editor, c, [...orders, index]);
 
       if (!isEqual(child.order, [...orders, index])) {
         setNodes(editor, { order: [...orders, index] }, { at: childPath });

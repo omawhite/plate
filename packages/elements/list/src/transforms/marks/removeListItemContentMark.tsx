@@ -1,54 +1,69 @@
-import { getNode, getNodes, setNodes } from '@udecode/plate-common';
+import { getNodes, setNodes } from '@udecode/plate-common';
 import {
+  AnyObject,
   getPlatePluginType,
   PlateEditor,
-  TAncestor,
   TNode,
 } from '@udecode/plate-core';
 import { castArray } from 'lodash';
-import { Editor, NodeEntry, Transforms } from 'slate';
+import { Editor, NodeEntry, Path, Point, Range } from 'slate';
 import { ELEMENT_LIC } from '../../defaults';
-import { getListItemLevel, getListRoot } from '../../queries';
-import { ListItemContentSelection } from '../../types';
-import { clearNodeMarks } from './clearNodeMarks';
+import { PreviousStates } from '../../types';
 
+/**
+ * Remove markers on the selected lic, if a specific path is not provided it uses the editor.selection
+ * @param {PlateEditor} editor
+ * @param {string | string[]} type
+ * @param {{at: Location}} options
+ */
 export const removeListItemContentMark = (
   editor: PlateEditor,
-  licSelection: ListItemContentSelection,
-  type: string | string[]
-): void => {
+  type: string | string[],
+  options?: {
+    at?: Path | Point | Range;
+    filter?: (
+      nodeEntry: NodeEntry<TNode<AnyObject>>,
+      index: number,
+      nodeEntries: NodeEntry<TNode<AnyObject>>[]
+    ) => boolean;
+  }
+) => {
   const types = castArray(type);
-  if (!licSelection.level) {
-    const node = getNode(editor, licSelection.path) as TNode;
-    Editor.withoutNormalizing(editor, () => {
-      Transforms.deselect(editor);
-      clearNodeMarks(editor, types, node, licSelection.path);
-    });
-  } else {
-    const root = getListRoot(editor, licSelection.path) as NodeEntry<TAncestor>;
-    const affectedLicLevel = getListItemLevel(licSelection.path);
+  const filter = options?.filter ?? (() => true);
+  const licType = getPlatePluginType(editor, ELEMENT_LIC);
+  const location: Path | Point | Range | null =
+    options?.at ?? editor?.selection;
+  if (!location) {
+    return null;
+  }
+  const nodeEntries = Array.from(
+    getNodes(editor, {
+      at: location,
+      match: { type: licType },
+    })
+  ).filter(filter);
 
-    const licNodeEntries = Array.from(
-      getNodes(editor, {
-        at: root[1],
-        match: { type: getPlatePluginType(editor, ELEMENT_LIC) },
-      })
-    ).filter(
-      (nodeEntry) => getListItemLevel(nodeEntry[1]) === affectedLicLevel
-    );
+  Editor.withoutNormalizing(editor, () => {
+    nodeEntries.forEach((nodeEntry) => {
+      const changeSet: Partial<Record<keyof PreviousStates, unknown>> = {};
+      const prev: PreviousStates = nodeEntry[0].prev ?? {};
 
-    Editor.withoutNormalizing(editor, () => {
-      Transforms.deselect(editor);
-      licNodeEntries.forEach(([node, path]) => {
-        clearNodeMarks(editor, types, node, path);
+      types.forEach((key) => {
+        changeSet[key as keyof PreviousStates] = null;
+        prev[key as keyof PreviousStates] = {
+          ...(prev[key as keyof PreviousStates] || {}),
+          dirty: false,
+        };
       });
+
       setNodes(
         editor,
         {
-          licStyles: {},
+          ...changeSet,
+          prev,
         },
-        { at: root[1] }
+        { at: nodeEntry[1] }
       );
     });
-  }
+  });
 };

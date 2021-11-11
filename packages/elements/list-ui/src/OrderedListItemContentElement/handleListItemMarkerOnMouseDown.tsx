@@ -8,14 +8,14 @@ import {
 import {
   ELEMENT_LIC,
   KEY_LIST,
-  ListItemContentSelection,
+  ListItemMarkerSelection,
   WithListOptions,
 } from '@udecode/plate-list';
 import { SetStateAction } from 'jotai';
 import { isEqual } from 'lodash';
 import { ReactEditor } from 'slate-react';
 
-export const onMouseDown = (
+export const handleListItemMarkerOnMouseDown = (
   ev: React.MouseEvent,
   editor: PlateEditor & ReactEditor,
   attributes: {
@@ -25,17 +25,17 @@ export const onMouseDown = (
     dir?: 'rtl';
     ref: React.MutableRefObject<HTMLElement>;
   },
-  setLicSelection: (
-    update: SetStateAction<ListItemContentSelection | undefined>
+  setMarkerSelection: (
+    update: SetStateAction<ListItemMarkerSelection | undefined>
   ) => void
 ): void => {
   if (attributes.ref?.current) {
     const licType = editor && getPlatePluginType(editor, ELEMENT_LIC);
-    const { supportedMarks }: WithListOptions = editor
+    const { marks }: WithListOptions = editor
       ? getPlatePluginOptions<Required<WithListOptions>>(editor, KEY_LIST)
       : {};
 
-    if (!supportedMarks?.length) {
+    if (!marks?.length) {
       return;
     }
 
@@ -51,19 +51,19 @@ export const onMouseDown = (
       });
 
       if (lic) {
-        setLicSelection((state) => {
+        setMarkerSelection((state) => {
           if (state) {
             if (isEqual(state.path, lic[1])) {
               return {
                 ...state,
-                level: !state.level,
+                depth: !state.depth,
               };
             }
           }
 
           return {
             path: lic[1],
-            level: true,
+            depth: true,
           };
         });
       }

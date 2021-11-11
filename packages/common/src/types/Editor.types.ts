@@ -21,7 +21,6 @@ export interface EditorAboveOptions<T = TAncestor> extends MatchOptions<T> {
   at?: Range | Path | Point;
   mode?: 'highest' | 'lowest';
   voids?: boolean;
-  throwError?: boolean;
 }
 
 export interface EditorParentOptions {

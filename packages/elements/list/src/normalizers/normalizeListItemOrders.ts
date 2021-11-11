@@ -8,9 +8,12 @@ import {
 import { NodeEntry, Path } from 'slate';
 import { ELEMENT_OL } from '../defaults';
 import { getListRoot } from '../queries';
-import { setNodeOrder } from '../transforms/marks/setNodeOrder';
+import { setListItemOrder } from '../transforms/marks/setListItemOrder';
 
-export const normalizeOrders = (editor: PlateEditor, location: Path): void => {
+export const normalizeListItemOrders = (
+  editor: PlateEditor,
+  location: Path
+): void => {
   if (!location) return;
 
   const olType = getPlatePluginType(editor, ELEMENT_OL);
@@ -25,9 +28,9 @@ export const normalizeOrders = (editor: PlateEditor, location: Path): void => {
 
   if (root) {
     if (root[0]?.type === olType) {
-      setNodeOrder('ol', editor, root);
+      setListItemOrder('ol', editor, root);
     } else {
-      setNodeOrder('ul', editor, root);
+      setListItemOrder('ul', editor, root);
     }
   }
 };

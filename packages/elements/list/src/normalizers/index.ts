@@ -3,8 +3,8 @@
  */
 
 export * from './normalizeList';
-export * from './normalizeListItemContentStyles';
+export * from './normalizeListItemMarks';
 export * from './normalizeListItem';
 export * from './normalizeNestedList';
-export * from './normalizeOrders';
-export * from './normalizeTextStyles';
+export * from './normalizeListItemOrders';
+export * from './normalizeListItemContentMarkToMarkers';
